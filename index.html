@@ -574,6 +574,15 @@
             }
         });
     </script>
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('Service Worker didaftarkan!'))
+    .catch(err => console.log('Gagal daftar SW:', err));
+}
+</script>
+
 </body>
 </html>
+
 
