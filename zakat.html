@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Zakat Pintar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #FFF9E5;
+            --primary-color: #4CAF50;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .calculator-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .calculator-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .input-section {
+            animation: fadeIn 0.8s ease;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .result-section {
+            animation: fadeIn 1s ease;
+        }
+
+        .result-card {
+            background-color: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .result-amount {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .history-section {
+            grid-column: 1 / -1;
+            animation: fadeIn 1.2s ease;
+        }
+
+        .chart-section {
+            grid-column: 1 / -1;
+            height: 300px;
+            animation: fadeIn 1.4s ease;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: rgba(76, 175, 80, 0.1);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 767px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Kalkulator Zakat Pintar</h1>
+            <p class="subtitle">Kira zakat anda dengan mudah dan pantas</p>
+        </header>
+
+        <div class="calculator-container">
+            <div class="card input-section">
+                <h2>Kira Zakat</h2>
+                <div class="form-group">
+                    <label for="zakatType">Jenis Zakat:</label>
+                    <select id="zakatType">
+                        <option value="pendapatan" selected>Zakat Pendapatan</option>
+                        <option value="simpanan">Zakat Simpanan</option>
+                        <option value="emas">Zakat Emas</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="incomeMonthlyGroup">
+                    <label for="incomeMonthly">Pendapatan Bulanan (RM):</label>
+                    <input type="number" id="incomeMonthly" min="0" placeholder="0.00">
+                </div>
+
+                <div class="form-group" id="incomeYearlyGroup">
+                    <label for="incomeYearly">Pendapatan Tahunan (RM):</label>
+                    <input type="number" id="incomeYearly" min="0" placeholder="0.00">
+                </div>
+
+                <div class="form-group hidden" id="savingsGroup">
+                    <label for="savingsAmount">Jumlah Simpanan (RM):</label>
+                    <input type="number" id="savingsAmount" min="0" placeholder="0.00">
+                </div>
+
+                <div class="form-group hidden" id="goldGroup">
+                    <label for="goldValue">Jumlah Nilai Emas (RM):</label>
+                    <input type="number" id="goldValue" min="0" placeholder="0.00">
+                </div>
+
+                <button id="calculateBtn" class="btn">Kira Zakat</button>
+            </div>
+
+            <div class="card result-section">
+                <h2>Hasil Pengiraan</h2>
+                <div id="resultContainer" class="hidden">
+                    <div class="result-card">
+                        <div class="result-title">Jumlah Zakat:</div>
+                        <div class="result-amount">RM <span id="zakatAmount">0.00</span></div>
+                        <div id="calculationDetails"></div>
+                    </div>
+                </div>
+                <div id="noResult" class="hidden">
+                    <p>Sila masukkan nilai dan klik "Kira Zakat" untuk melihat hasil.</p>
+                </div>
+            </div>
+
+            <div class="card history-section">
+                <h2>Sejarah Pengiraan</h2>
+                <div id="historyTableContainer">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Tarikh</th>
+                                <th>Jenis</th>
+                                <th>Jumlah (RM)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="emptyHistory" class="hidden">
+                    <p>Tiada sejarah pengiraan lagi.</p>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="downloadBtn" class="btn btn-secondary">Muat Turun CSV</button>
+                    <button id="clearHistoryBtn" class="btn btn-danger">Padam Semua Rekod</button>
+                </div>
+            </div>
+
+            <div class="card chart-section">
+                <h2>Ringkasan Bulanan</h2>
+                <canvas id="zakatChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const zakatTypeSelect = document.getElementById('zakatType');
+            const incomeMonthlyGroup = document.getElementById('incomeMonthlyGroup');
+            const incomeYearlyGroup = document.getElementById('incomeYearlyGroup');
+            const savingsGroup = document.getElementById('savingsGroup');
+            const goldGroup = document.getElementById('goldGroup');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultContainer = document.getElementById('resultContainer');
+            const noResult = document.getElementById('noResult');
+            const zakatAmount = document.getElementById('zakatAmount');
+            const calculationDetails = document.getElementById('calculationDetails');
+            const historyTableBody = document.getElementById('historyTableBody');
+            const emptyHistory = document.getElementById('emptyHistory');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+            
+            // Chart initialization
+            const ctx = document.getElementById('zakatChart').getContext('2d');
+            let zakatChart = null;
+            
+            // Event listeners
+            zakatTypeSelect.addEventListener('change', toggleInputFields);
+            calculateBtn.addEventListener('click', calculateZakat);
+            downloadBtn.addEventListener('click', downloadCSV);
+            clearHistoryBtn.addEventListener('click', clearHistory);
+            
+            // Initialize the page
+            toggleInputFields();
+            loadHistory();
+            updateChart();
+            
+            // Function to toggle input fields based on zakat type
+            function toggleInputFields() {
+                const zakatType = zakatTypeSelect.value;
+                
+                // Hide all groups first
+                incomeMonthlyGroup.classList.add('hidden');
+                incomeYearlyGroup.classList.add('hidden');
+                savingsGroup.classList.add('hidden');
+                goldGroup.classList.add('hidden');
+                
+                // Show relevant groups based on zakat type
+                if (zakatType === 'pendapatan') {
+                    incomeMonthlyGroup.classList.remove('hidden');
+                    incomeYearlyGroup.classList.remove('hidden');
+                } else if (zakatType === 'simpanan') {
+                    savingsGroup.classList.remove('hidden');
+                } else if (zakatType === 'emas') {
+                    goldGroup.classList.remove('hidden');
+                }
+            }
+            
+            // Function to calculate zakat
+            function calculateZakat() {
+                const zakatType = zakatTypeSelect.value;
+                let amount = 0;
+                let details = '';
+                
+                if (zakatType === 'pendapatan') {
+                    const monthly = parseFloat(document.getElementById('incomeMonthly').value) || 0;
+                    const yearly = parseFloat(document.getElementById('incomeYearly').value) || 0;
+                    amount = (monthly * 12 + yearly) * 0.025;
+                    details = `(RM ${monthly.toFixed(2)} × 12 + RM ${yearly.toFixed(2)}) × 2.5%`;
+                } else if (zakatType === 'simpanan') {
+                    const savings = parseFloat(document.getElementById('savingsAmount').value) || 0;
+                    amount = savings * 0.025;
+                    details = `RM ${savings.toFixed(2)} × 2.5%`;
+                } else if (zakatType === 'emas') {
+                    const gold = parseFloat(document.getElementById('goldValue').value) || 0;
+                    amount = gold * 0.025;
+                    details = `RM ${gold.toFixed(2)} × 2.5%`;
+                }
+                
+                // Display result
+                if (amount > 0) {
+                    zakatAmount.textContent = amount.toFixed(2);
+                    calculationDetails.textContent = details;
+                    resultContainer.classList.remove('hidden');
+                    noResult.classList.add('hidden');
+                    
+                    // Save to history
+                    saveToHistory(zakatType, amount);
+                    
+                    // Update history table and chart
+                    loadHistory();
+                    updateChart();
+                } else {
+                    resultContainer.classList.add('hidden');
+                    noResult.classList.remove('hidden');
+                }
+            }
+            
+            // Function to save calculation to localStorage
+            function saveToHistory(type, amount) {
+                const history = JSON.parse(localStorage.getItem('zakatHistory') || '[]');
+                
+                // Add new entry
+                history.push({
+                    date: new Date().toISOString(),
+                    type: type,
+                    amount: amount
+                });
+                
+                // Save back to localStorage
+                localStorage.setItem('zakatHistory', JSON.stringify(history));
+            }
+            
+            // Function to load history from localStorage
+            function loadHistory() {
+                const history = JSON.parse(localStorage.getItem('zakatHistory') || '[]');
+                
+                // Clear table body
+                historyTableBody.innerHTML = '';
+                
+                if (history.length > 0) {
+                    historyTableContainer.classList.remove('hidden');
+                    emptyHistory.classList.add('hidden');
+                    
+                    // Add rows to table
+                    history.forEach(entry => {
+                        const row = document.createElement('tr');
+                        
+                        const dateCell = document.createElement('td');
+                        dateCell.textContent = new Date(entry.date).toLocaleDateString('ms-MY');
+                        
+                        const typeCell = document.createElement('td');
+                        let typeText = '';
+                        if (entry.type === 'pendapatan') typeText = 'Pendapatan';
+                        else if (entry.type === 'simpanan') typeText = 'Simpanan';
+                        else if (entry.type === 'emas') typeText = 'Emas';
+                        typeCell.textContent = typeText;
+                        
+                        const amountCell = document.createElement('td');
+                        amountCell.textContent = entry.amount.toFixed(2);
+                        
+                        row.appendChild(dateCell);
+                        row.appendChild(typeCell);
+                        row.appendChild(amountCell);
+                        
+                        historyTableBody.appendChild(row);
+                    });
+                } else {
+                    historyTableContainer.classList.add('hidden');
+                    emptyHistory.classList.remove('hidden');
+                }
+            }
+            
+            // Function to update the chart
+            function updateChart() {
+                const history = JSON.parse(localStorage.getItem('zakatHistory') || '[]');
+                
+                // Group by month
+                const monthlyData = {};
+                
+                history.forEach(entry => {
+                    const date = new Date(entry.date);
+                    const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
+                    
+                    if (!monthlyData[monthYear]) {
+                        monthlyData[monthYear] = 0;
+                    }
+                    
+                    monthlyData[monthYear] += entry.amount;
+                });
+                
+                // Prepare chart data
+                const labels = Object.keys(monthlyData);
+                const data = Object.values(monthlyData);
+                
+                // Destroy previous chart if exists
+                if (zakatChart) {
+                    zakatChart.destroy();
+                }
+                
+                // Create new chart
+                zakatChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Jumlah Zakat (RM)',
+                            data: data,
+                            backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                            borderColor: 'rgba(76, 175, 80, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Jumlah (RM)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Bulan/Tahun'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Function to download history as CSV
+            function downloadCSV() {
+                const history = JSON.parse(localStorage.getItem('zakatHistory') || '[]');
+                
+                if (history.length === 0) {
+                    alert('Tiada data untuk dimuat turun.');
+                    return;
+                }
+                
+                // Create CSV content
+                let csvContent = 'Tarikh,Jenis,Jumlah (RM)\n';
+                
+                history.forEach(entry => {
+                    let typeText = '';
+                    if (entry.type === 'pendapatan') typeText = 'Pendapatan';
+                    else if (entry.type === 'simpanan') typeText = 'Simpanan';
+                    else if (entry.type === 'emas') typeText = 'Emas';
+                    
+                    csvContent += `${new Date(entry.date).toLocaleDateString('ms-MY')},${typeText},${entry.amount.toFixed(2)}\n`;
+                });
+                
+                // Create download link
+                const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
+                const link = document.createElement('a');
+                link.setAttribute('href', encodedUri);
+                link.setAttribute('download', 'sejarah_zakat.csv');
+                document.body.appendChild(link);
+                
+                // Trigger download
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // Function to clear history
+            function clearHistory() {
+                if (confirm('Adakah anda pasti ingin memadam semua sejarah pengiraan?')) {
+                    localStorage.removeItem('zakatHistory');
+                    loadHistory();
+                    updateChart();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
